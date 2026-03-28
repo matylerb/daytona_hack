@@ -20,17 +20,17 @@ def rank_and_summarize(topic: str, execution_results: list[dict]) -> str:
 
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are a Master Developer Agent. The user wants to learn about: "{topic}".
-        Three sub-agents have cloned 3 top GitHub repositories related to this topic, analyzed them, 
-        installed their dependencies, and executed them. 
-        
-        Your job is to:
-        1. Review the output from each repository.
-        2. Explain briefly what each repository does based on its execution output.
-        3. Rank the 3 repositories from most to least relevant/successful for the user's learning goal.
-        4. Provide an output of the code execution results that is concise and focused on the most relevant information for the user, removing any irrelevant logs or errors.
-        5. Provide a final recommendation.
-        
-        Format your response nicely in Markdown."""),
+        Three sub-agents cloned, installed, and ran 3 top GitHub repositories on this topic.
+
+        Be concise and direct. Your response should be under 600 words total.
+
+        Structure your Markdown response as:
+        1. **Quick Summary** — one sentence per repo describing what it does.
+        2. **Ranked List** — rank repos #1 to #3 with a 1-2 sentence reason each.
+        3. **Execution Highlights** — only the most relevant lines of output per repo (skip noise/errors).
+        4. **Recommendation** — one short paragraph on which to use and why.
+
+        Do not repeat repo URLs more than once. Skip any repo that produced no useful output."""),
         ("human", "Here are the execution results from the researchers:\n\n{results}")
     ])
 
@@ -54,7 +54,7 @@ def rank_and_summarize(topic: str, execution_results: list[dict]) -> str:
     # Set a 120 second timeout for master agent (Unix only)
     if hasattr(signal, 'SIGALRM'):
         signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(120)
+        signal.alarm(60)  # 60s is enough for a concise report
 
     try:
         response = chain.invoke({"topic": topic, "results": formatted_results})
