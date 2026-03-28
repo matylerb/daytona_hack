@@ -81,46 +81,40 @@
         align-items: center;
     }
 
-    /* ─── HERO HEADER ─── */
+    /* ─── HERO HEADER (merged) ─── */
     .hero {
         display: grid;
-        grid-template-columns: auto 1fr auto;
+        grid-template-columns: 1fr auto;
         border-bottom: var(--border);
     }
 
-    .hero-title {
+    .hero-main {
         padding: 28px 32px;
         border-right: var(--border);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        gap: 16px;
     }
 
-    .hero-title h1 {
+    .hero-main h1 {
         font-family: 'Bebas Neue', sans-serif;
         font-size: clamp(2.8rem, 5vw, 4.5rem);
         line-height: 0.9;
         letter-spacing: 0.02em;
     }
 
-    .hero-title h1 span {
-        display: block;
-    }
+    .hero-main h1 span { display: block; }
+    .hero-main h1 .dash { color: var(--accent); }
 
-    .hero-title h1 .dash { color: var(--accent); }
-
-    .hero-sub {
-        padding: 28px 32px;
-        border-right: var(--border);
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-end;
-        gap: 2px;
-    }
-
-    .hero-sub p {
-        font-size: 0.75rem;
-        line-height: 1.9;
+    .hero-tagline {
+        font-size: 0.72rem;
         color: var(--mid);
         text-transform: uppercase;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.1em;
+        line-height: 1.6;
+        padding-top: 12px;
+        border-top: var(--border-light);
     }
 
     .hero-meta {
@@ -509,7 +503,6 @@
         color: var(--black);
     }
 
-    /* ── Markdown typography ── */
     .report-body h1,
     .report-body h2,
     .report-body h3,
@@ -539,7 +532,6 @@
     .report-body strong { font-weight: 700; }
     .report-body em { font-style: italic; color: #555; }
 
-    /* Inline code */
     .report-body code {
         font-family: 'IBM Plex Mono', monospace;
         font-size: 0.78rem;
@@ -550,7 +542,6 @@
         color: var(--accent);
     }
 
-    /* Code blocks */
     .report-body pre {
         background: var(--black);
         border: var(--border);
@@ -569,7 +560,6 @@
         line-height: 1.7;
     }
 
-    /* Blockquote */
     .report-body blockquote {
         border-left: 4px solid var(--black);
         margin: 1em 0;
@@ -580,7 +570,6 @@
     }
     .report-body blockquote p { margin: 0; }
 
-    /* Lists */
     .report-body ul,
     .report-body ol {
         padding-left: 1.6em;
@@ -590,11 +579,9 @@
     .report-body ul li::marker { color: var(--accent); content: "▸  "; }
     .report-body ol li::marker { font-weight: 700; }
 
-    /* Nested lists */
     .report-body ul ul,
     .report-body ol ul { margin: 0.2em 0; }
 
-    /* Tables */
     .report-body table {
         border-collapse: collapse;
         width: 100%;
@@ -621,14 +608,12 @@
     .report-body tr:nth-child(even) td { background: #f0ede6; }
     .report-body tr:hover td { background: #e8e5de; }
 
-    /* Horizontal rule */
     .report-body hr {
         border: none;
         border-top: var(--border);
         margin: 2em 0;
     }
 
-    /* Checkboxes (GFM task lists) */
     .report-body input[type="checkbox"] {
         appearance: none;
         width: 12px;
@@ -641,9 +626,7 @@
         top: -1px;
         cursor: default;
     }
-    .report-body input[type="checkbox"]:checked {
-        background: var(--black);
-    }
+    .report-body input[type="checkbox"]:checked { background: var(--black); }
     .report-body input[type="checkbox"]:checked::after {
         content: "✓";
         position: absolute;
@@ -653,14 +636,10 @@
         top: -1px;
     }
 
-    /* First child margin fix */
     .report-body > *:first-child { margin-top: 0; }
 
     /* ─── EXECUTE MODE RESULT ─── */
-    .execute-result {
-        display: none;
-    }
-
+    .execute-result { display: none; }
     .execute-result.visible { display: block; }
 
     .exec-meta {
@@ -742,7 +721,7 @@
     /* ─── RESPONSIVE ─── */
     @media (max-width: 900px) {
         .hero { grid-template-columns: 1fr; }
-        .hero-title, .hero-sub { border-right: none; border-bottom: var(--border-light); }
+        .hero-main { border-right: none; border-bottom: var(--border-light); }
         .repo-cards { grid-template-columns: 1fr; }
         .repo-card { border-right: none; border-bottom: var(--border-light); }
         .agent-grid { grid-template-columns: 1fr; }
@@ -768,41 +747,35 @@
     <div class="nav-badge" id="api-badge">● OFFLINE</div>
     </nav>
 
-    <!-- HERO -->
+    <!-- HERO (merged) -->
     <header class="hero">
-    <div class="hero-title">
+      <div class="hero-main">
         <h1>
-        <span>REPO<span class="dash">—</span></span>
-        <span>RESEARCH</span>
-        <span>AGENT</span>
-        <span>TERMINAL</span>
+          <span>REPO<span class="dash">—</span></span>
+          <span>RESEARCH</span>
+          <span>AGENT</span>
+          <span>TERMINAL</span>
         </h1>
-    </div>
-    <div class="hero-sub">
-        <p>Autonomous</p>
-        <p>GitHub</p>
-        <p>Research</p>
-        <p>Powered By</p>
-        <p>Daytona + LLM</p>
-    </div>
-    <div class="hero-meta">
+        <p class="hero-tagline">Autonomous GitHub research &amp; execution — powered by Daytona sandboxes + LLM reasoning.</p>
+      </div>
+      <div class="hero-meta">
         <div class="status-row">
-        <div class="dot" id="dot-api"></div>
-        <span id="label-api">API Offline</span>
+          <div class="dot" id="dot-api"></div>
+          <span id="label-api">API Offline</span>
         </div>
         <div class="status-row">
-        <div class="dot green"></div>
-        <span>GitHub Connected</span>
+          <div class="dot green"></div>
+          <span>GitHub Connected</span>
         </div>
         <div class="status-row">
-        <div class="dot" id="dot-daytona"></div>
-        <span id="label-daytona">Daytona Standby</span>
+          <div class="dot" id="dot-daytona"></div>
+          <span id="label-daytona">Daytona Standby</span>
         </div>
         <div class="status-row">
-        <div class="dot green"></div>
-        <span>LLM Ready</span>
+          <div class="dot green"></div>
+          <span>LLM Ready</span>
         </div>
-    </div>
+      </div>
     </header>
 
     <!-- MODE SWITCHER -->
@@ -845,13 +818,11 @@
     <!-- RESULTS AREA -->
     <div class="results-area">
 
-    <!-- Empty state -->
     <div class="empty-state" id="empty-state">
         <div class="empty-glyph">{ }</div>
         <div class="empty-label">Awaiting input — select a mode and enter a query</div>
     </div>
 
-    <!-- Loading -->
     <div class="loading-state" id="loading-state">
         <div class="loading-header">
         <div class="spinner"></div>
@@ -876,13 +847,11 @@
         </div>
     </div>
 
-    <!-- Research results -->
     <div class="repo-grid" id="repo-grid">
         <div class="section-label">LATEST EXECUTION RESULTS</div>
         <div class="repo-cards" id="repo-cards"></div>
     </div>
 
-    <!-- Report -->
     <div class="report-panel" id="report-panel">
         <div class="report-header">
         🏆 &nbsp;MASTER AGENT REPORT
@@ -890,7 +859,6 @@
         <div class="report-body" id="report-body"></div>
     </div>
 
-    <!-- Execute result -->
     <div class="execute-result" id="execute-result">
         <div class="section-label">EXECUTION RESULT</div>
         <div class="exec-meta" id="exec-meta"></div>
@@ -914,7 +882,6 @@
     const API_BASE = "";
     let currentMode = "research";
 
-    // ── Footer clock ──
     function tick() {
         const d = new Date();
         document.getElementById("footer-time").textContent =
@@ -923,7 +890,6 @@
     tick();
     setInterval(tick, 1000);
 
-    // ── API health check ──
     async function checkHealth() {
         try {
         const r = await fetch(`${API_BASE}/api/health`, { signal: AbortSignal.timeout(3000) });
@@ -940,7 +906,6 @@
     checkHealth();
     setInterval(checkHealth, 10000);
 
-    // ── Mode switch ──
     function switchMode(mode) {
         currentMode = mode;
         const btnR = document.getElementById("btn-research");
@@ -962,7 +927,6 @@
         resetResults();
     }
 
-    // ── Reset ──
     function resetResults() {
         ["repo-grid", "report-panel", "execute-result", "loading-state"].forEach(id => {
         document.getElementById(id).classList.remove("visible");
@@ -972,7 +936,6 @@
         document.getElementById("error-banner").classList.remove("visible");
     }
 
-    // ── Simulate agent log animation ──
     let logInterval = null;
     const logMessages = [
         ["Cloning repository...", "Scanning manifest...", "Planning execution..."],
@@ -995,7 +958,6 @@
         if (logInterval) clearInterval(logInterval);
     }
 
-    // ── Main submit handler ──
     async function handleSubmit() {
         const input = document.getElementById("main-input").value.trim();
         if (!input) return;
@@ -1030,37 +992,31 @@
         btn.textContent = "EXECUTE";
     }
 
-    // ── Research mode ──
     async function doResearch(topic) {
         try {
-            const res = await fetch(`${API_BASE}/api/research`, {
+        const res = await fetch(`${API_BASE}/api/research`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ topic })
         });
         const data = await res.json();
-
         if (!res.ok) throw new Error(data.error || "Unknown error");
-
         renderRepoCards(data.repos);
         renderReport(data.report);
-
         } catch (e) {
-            showError(e.message);
+        showError(e.message);
         }
     }
 
     function renderRepoCards(repos) {
         const container = document.getElementById("repo-cards");
         container.innerHTML = "";
-
         repos.forEach((repo, i) => {
         const url = repo.repo_url || "";
         const name = url.split("/").slice(-2).join("/") || url;
         const success = repo.success;
         const type = repo.project_type || "Unknown";
         const output = (repo.output || "").trim();
-
         container.innerHTML += `
             <div class="repo-card">
             <div class="repo-card-row">
@@ -1090,21 +1046,15 @@
             </div>
         `;
         });
-
         document.getElementById("repo-grid").classList.add("visible");
     }
 
     function renderReport(report) {
-        // Configure marked for GFM (GitHub Flavored Markdown)
-        marked.setOptions({
-        gfm: true,
-        breaks: true,
-        });
+        marked.setOptions({ gfm: true, breaks: true });
         document.getElementById("report-body").innerHTML = marked.parse(report);
         document.getElementById("report-panel").classList.add("visible");
     }
 
-    // ── Execute mode ──
     async function doExecute(repoUrl) {
         try {
         const res = await fetch(`${API_BASE}/api/execute`, {
@@ -1113,11 +1063,8 @@
             body: JSON.stringify({ repo_url: repoUrl })
         });
         const data = await res.json();
-
         if (!res.ok) throw new Error(data.error || "Unknown error");
-
         renderExecuteResult(data);
-
         } catch (e) {
         showError(e.message);
         }
@@ -1127,7 +1074,6 @@
         const meta = document.getElementById("exec-meta");
         const url = data.repo_url || "";
         const name = url.split("/").slice(-2).join("/") || url;
-
         meta.innerHTML = `
         <div class="exec-meta-item">
             <div class="exec-meta-label">Repository</div>
@@ -1150,18 +1096,16 @@
             <div class="exec-meta-value" style="font-weight:400;font-size:0.7rem">${escHtml(data.reasoning || '')}</div>
         </div>
         `;
-
         document.getElementById("exec-output-code").textContent = (data.output || "(no output)").trim();
         document.getElementById("execute-result").classList.add("visible");
     }
 
-    // ── Helpers ──
     function showError(msg) {
         const b = document.getElementById("error-banner");
         b.textContent = "ERROR: " + msg;
         b.classList.add("visible");
         document.getElementById("empty-state").style.display = "flex";
-        }
+    }
 
     function escHtml(str) {
         return String(str)
@@ -1169,9 +1113,8 @@
         .replace(/</g, "&lt;")
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;");
-        }
+    }
 
-    // Enter key submit
     document.getElementById("main-input").addEventListener("keydown", e => {
         if (e.key === "Enter") handleSubmit();
     });
