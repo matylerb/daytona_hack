@@ -3,6 +3,7 @@ import json
 import logging
 import signal
 import concurrent.futures
+import base64
 import requests as http_requests
 from dotenv import load_dotenv
 from daytona import Daytona, DaytonaConfig
@@ -83,7 +84,7 @@ def _is_docs_only(name: str, description: str, topics: list, files: list) -> boo
     name_lower = name.lower()
     if name_lower.startswith("awesome-") or name_lower == "awesome":
         return True
-    non_readme = [f for f in files if not f.lower().startswith("readme")]
+    non_readme =[f for f in files if not f.lower().startswith("readme")]
     if len(files) > 0 and len(non_readme) == 0:
         return True
     return False
@@ -110,7 +111,7 @@ def _fetch_file_via_api(owner_repo: str, path: str, headers: dict) -> Optional[s
 def clean_requirements(content: str, max_lines: int = 40) -> str:
     lines = content.splitlines()
     seen  = set()
-    cleaned = [
+    cleaned =[
         line for line in lines
         if not line.strip().startswith("#")
         and (pkg := line.split("==")[0].split(">=")[0].split("<=")[0].strip()) not in seen
@@ -120,17 +121,12 @@ def clean_requirements(content: str, max_lines: int = 40) -> str:
 
 
 # --------------------------------------------------------------------------- #
-# FIX #3 + #1: Pre-fetch metadata AND all key file contents via GitHub API    #
-# in parallel, before the sandbox even boots.                                  #
+# Pre-fetch metadata AND all key file contents via GitHub API                 #
 # --------------------------------------------------------------------------- #
 
 def _github_precheck(repo_url: str):
     """
-    Fetches GitHub metadata + key file contents via API (all in parallel).
-    Returns one of:
-      - A short-circuit result dict  (docs/list repos)
-      - A prefetch dict with '_prefetched': True  (proceed to sandbox with data)
-      - None  (API unavailable — fall through to sandbox-based scrape)
+    Fetches GitHub metadata + recursive file tree via API (all in parallel).
     """
     try:
         owner_repo = _owner_repo_from_url(repo_url)
@@ -139,35 +135,36 @@ def _github_precheck(repo_url: str):
 
         headers = _gh_headers()
 
-        # FIX #1 (pre-sandbox): Fetch repo metadata and root file listing in parallel
-        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
-            meta_future = ex.submit(
-                http_requests.get,
-                f"https://api.github.com/repos/{owner_repo}",
-                **{"headers": headers, "timeout": 6}
-            )
-            tree_future = ex.submit(
-                http_requests.get,
-                f"https://api.github.com/repos/{owner_repo}/contents",
-                **{"headers": headers, "timeout": 6}
-            )
-            meta_resp = meta_future.result()
-            tree_resp = tree_future.result()
+        meta_resp = http_requests.get(
+            f"https://api.github.com/repos/{owner_repo}",
+            headers=headers, timeout=6
+        )
 
-        if meta_resp.status_code != 200 or tree_resp.status_code != 200:
+        if meta_resp.status_code != 200:
             return None
 
-        m      = meta_resp.json()
+        m = meta_resp.json()
         name   = m.get("name", "")
         desc   = m.get("description", "") or ""
-        topics = m.get("topics", [])
+        topics = m.get("topics",[])
+        default_branch = m.get("default_branch", "main")
 
-        root_items = tree_resp.json()
-        if not isinstance(root_items, list):
+        # Fetch the FULL RECURSIVE file tree so subdirectories aren't ignored
+        tree_resp = http_requests.get(
+            f"https://api.github.com/repos/{owner_repo}/git/trees/{default_branch}?recursive=1",
+            headers=headers, timeout=6
+        )
+
+        if tree_resp.status_code != 200:
             return None
-        files = [f["name"] for f in root_items if isinstance(f, dict)]
 
-        # Short-circuit for obvious docs/list repos — no sandbox needed
+        tree_data = tree_resp.json()
+        root_items = tree_data.get("tree",[])
+
+        # Filter to files only
+        files = [f["path"] for f in root_items if f.get("type") == "blob"]
+
+        # Short-circuit for obvious docs/list repos
         if _is_docs_only(name, desc, topics, files):
             logger.info(f"[{repo_url}] Pre-check: docs/list repo — skipping sandbox.")
             return {
@@ -178,22 +175,27 @@ def _github_precheck(repo_url: str):
                 "output":       "This repository is a documentation or list repository. No executable application found.",
             }
 
-        # FIX #1 + #3: Fetch all key files in parallel via GitHub API
-        # This entirely replaces the serial per-file sandbox round-trips in scrape_repo_context
         key_filenames = {
             "requirements.txt", "package.json", "main.py",
             "app.py", "index.js", "README.md", "pyproject.toml"
         }
+        
+        ignore_dirs = {"node_modules", ".git", "__pycache__", "venv", ".venv"}
+        ignore_exts = {".png", ".jpg", ".jpeg", ".gif", ".ico", ".svg", ".pdf", ".mp4"}
+
+        # Extract only relevant key files while avoiding massive bloat directories
         files_to_fetch = [
             f["path"] for f in root_items
-            if isinstance(f, dict)
-            and f.get("name") in key_filenames
-            and f.get("type") == "file"
+            if f.get("type") == "blob"
+            and f["path"].split("/")[-1] in key_filenames
+            and not any(ignored in f["path"].split("/") for ignored in ignore_dirs)
         ]
+
+        files_to_fetch = files_to_fetch[:15]  # Safety cap
 
         logger.info(f"[{repo_url}] Pre-fetching {len(files_to_fetch)} key files in parallel via GitHub API...")
 
-        contents_parts = []
+        contents_parts =[]
         if files_to_fetch:
             with concurrent.futures.ThreadPoolExecutor(max_workers=len(files_to_fetch)) as ex:
                 fetch_futures = {
@@ -207,12 +209,15 @@ def _github_precheck(repo_url: str):
                         body = clean_requirements(content) if "requirements" in path else content[:1500]
                         contents_parts.append(f"### {path}\n{body}")
 
-        # Build a simple file-tree string from the API root listing
+        # Construct file tree string properly nested up to 400 paths
         file_tree_lines = [
-            f"/home/daytona/project/{f['name']}" + ("/" if f.get("type") == "dir" else "")
-            for f in root_items if isinstance(f, dict)
+            f"/home/daytona/project/{f['path']}" + ("/" if f.get("type") == "tree" else "")
+            for f in root_items
+            if not any(ignored in f["path"].split("/") for ignored in ignore_dirs)
+            and not any(f["path"].lower().endswith(ext) for ext in ignore_exts)
         ]
-        file_tree = "\n".join(file_tree_lines)
+        
+        file_tree = "\n".join(file_tree_lines[:400]) 
 
         logger.info(f"[{repo_url}] Pre-check complete — proceeding with sandbox.")
         return {
@@ -239,10 +244,6 @@ def _exec(sandbox, cmd: str, cwd=None) -> str:
 
 
 def scrape_repo_context(sandbox, workspace_root: str):
-    """
-    FIX #1: Reads ALL key files in a single bash round-trip using delimiters,
-    replacing the original one-_exec-per-file loop.
-    """
     file_tree = _exec(
         sandbox,
         f"find {workspace_root} -maxdepth 3 "
@@ -255,7 +256,7 @@ def scrape_repo_context(sandbox, workspace_root: str):
         "requirements.txt", "package.json", "main.py",
         "app.py", "index.js", "README.md", "pyproject.toml"
     }
-    matched_files = [
+    matched_files =[
         line.strip() for line in file_tree.split("\n")
         if any(line.strip().endswith(name) for name in key_filenames)
     ]
@@ -263,18 +264,16 @@ def scrape_repo_context(sandbox, workspace_root: str):
     if not matched_files:
         return file_tree, ""
 
-    # Single round-trip: print a unique delimiter before each file then cat it
     DELIM = "===CATFILE==="
-    bash_parts = [
+    bash_parts =[
         f"echo '{DELIM}{path}' && cat '{path}' 2>/dev/null || true"
         for path in matched_files
     ]
     raw_output = _exec(sandbox, f"bash -c \"{' && '.join(bash_parts)}\"")
 
-    # Parse the delimited output
-    contents_parts = []
+    contents_parts =[]
     current_path   = None
-    current_lines  = []
+    current_lines  =[]
 
     for line in raw_output.split("\n"):
         if line.startswith(DELIM):
@@ -284,11 +283,10 @@ def scrape_repo_context(sandbox, workspace_root: str):
                 body    = clean_requirements(content) if "requirements" in rel else content[:1500]
                 contents_parts.append(f"### {rel}\n{body}")
             current_path  = line[len(DELIM):]
-            current_lines = []
+            current_lines =[]
         else:
             current_lines.append(line)
 
-    # Flush last file
     if current_path and current_lines:
         content = "\n".join(current_lines).strip()
         rel     = current_path.replace(workspace_root + "/", "")
@@ -299,31 +297,17 @@ def scrape_repo_context(sandbox, workspace_root: str):
 
 
 def _validate_install_commands(commands: List[str], file_tree: str) -> List[str]:
-    """
-    FIX #2: Strip out broken uv install commands that carry no package argument.
-    The LLM sometimes emits 'uv pip install --system' with nothing after it
-    when there's no requirements.txt — this caused silent 90s timeouts.
-    """
     has_requirements = "requirements.txt" in file_tree
-    cleaned = []
+    cleaned =[]
     for cmd in commands:
         s = cmd.strip()
         if not s:
             continue
-
-        # Bare 'uv pip install --system' with no target
         if s == "uv pip install --system":
-            logger.warning("Dropping bare 'uv pip install --system' — no package argument.")
             continue
-
-        # uv requirements install when file doesn't exist
         if "uv pip install" in s and "-r requirements.txt" in s and not has_requirements:
-            logger.warning("Dropping uv -r requirements.txt — requirements.txt not in tree.")
             continue
-
-        # uv install that ends with only flags (no package/file target)
         if s.startswith("uv pip install") and s.endswith(("--system", "--no-build-isolation", "--system --no-build-isolation")):
-            logger.warning(f"Dropping incomplete uv command: {s}")
             continue
 
         cleaned.append(cmd)
@@ -343,24 +327,8 @@ def _timeout_handler(signum, frame):
 # --------------------------------------------------------------------------- #
 
 def execute_repo(repo_link: str) -> dict:
-    """
-    Performance improvements vs original:
-
-    FIX #1 — Batch file reads: all key file cat calls combined into ONE
-              bash round-trip (was N serial _exec calls).
-    FIX #2 — Guard broken uv installs: strip empty 'uv pip install --system'
-              commands that caused silent 90s timeouts.
-    FIX #3 — Pre-fetch via GitHub API: key file contents fetched in parallel
-              before sandbox boots, using GitHub REST API.
-    FIX #4 — Parallel sandbox + LLM: LLM plan generation runs concurrently
-              with daytona.create(), hiding sandbox boot latency.
-    FIX #5 — Faster install: 60s timeout (was 90s) + --no-build-isolation.
-    """
-
-    # Pre-check: fetches metadata + key file contents via GitHub API (all parallel)
     precheck = _github_precheck(repo_link)
 
-    # Short-circuit: docs/list repo detected
     if precheck is not None and not precheck.get("_prefetched"):
         return precheck
 
@@ -371,12 +339,11 @@ def execute_repo(repo_link: str) -> dict:
     has_sigalrm    = hasattr(signal, "SIGALRM")
     workspace_root = "/home/daytona/project"
 
-    # ── FIX #4: If we have pre-fetched context, run LLM plan WHILE sandbox boots ──
     if prefetched and api_file_tree:
         logger.info(f"[{repo_link}] Starting sandbox + LLM plan in parallel...")
 
         plan_result    = [None]
-        plan_exception = [None]
+        plan_exception =[None]
 
         def _run_plan():
             try:
@@ -408,17 +375,15 @@ def execute_repo(repo_link: str) -> dict:
         plan_prefetched = None
 
     try:
-        # Clone (shallow)
+        # Wrapped clone in explicit bash shell wrapper for robust command arguments parsing 
         logger.info(f"[{repo_link}] Cloning (shallow)...")
-        _exec(sandbox, f"git clone --depth 1 {repo_link} {workspace_root}")
+        _exec(sandbox, f"bash -c \"env GIT_TERMINAL_PROMPT=0 git clone -c core.autocrlf=false --depth 1 {repo_link} {workspace_root} < /dev/null\"")
 
-        # Use pre-computed plan if available, otherwise scrape + call LLM now
         if plan_prefetched is not None:
             plan = plan_prefetched
             file_tree_for_validation = api_file_tree
             logger.info(f"[{repo_link}] Using pre-computed plan — skipping sandbox scrape.")
         else:
-            # FIX #1: single-round-trip batched scrape
             logger.info(f"[{repo_link}] Scraping repo (batched single round-trip)...")
             file_tree, file_contents = scrape_repo_context(sandbox, workspace_root)
             file_tree_for_validation = file_tree
@@ -460,17 +425,19 @@ def execute_repo(repo_link: str) -> dict:
             else workspace_root
         )
 
-        # FIX #2: Strip broken install commands before running
         install_cmds = _validate_install_commands(plan.install_commands, file_tree_for_validation)
 
         if install_cmds:
             logger.info(f"[{repo_link}] Installing ({len(install_cmds)} step(s) combined)...")
             combined = " && ".join(install_cmds)
-            # FIX #5: 60s timeout (was 90s); --no-build-isolation already in LLM prompt
+            
+            # Pipe base64 straight into bash; avoids quotes issues and forces EOF to kill interactive stdin prompts
+            b64_cmd = base64.b64encode(combined.encode('utf-8')).decode('utf-8')
+            
             out = _exec(
                 sandbox,
                 f"export DEBIAN_FRONTEND=noninteractive PIP_NO_INPUT=1; "
-                f"timeout 60s bash -c '{combined}' 2>&1",
+                f"echo {b64_cmd} | base64 -d | timeout 60s bash 2>&1",
                 cwd=run_cwd,
             )
             logger.info(f"[{repo_link}] Install tail: {out[-300:]}")
@@ -478,14 +445,19 @@ def execute_repo(repo_link: str) -> dict:
             logger.info(f"[{repo_link}] No valid install commands — skipping install.")
 
         # Run (15s hard limit)
-        logger.info(f"[{repo_link}] Running project (15s timeout)...")
-        final_output = _exec(
-            sandbox,
-            f"timeout 15s bash -c '{plan.run_command} 2>&1'",
-            cwd=run_cwd,
-        )
+        if plan.run_command:
+            logger.info(f"[{repo_link}] Running project (15s timeout)...")
+            b64_run = base64.b64encode(plan.run_command.encode('utf-8')).decode('utf-8')
+            
+            final_output = _exec(
+                sandbox,
+                f"echo {b64_run} | base64 -d | timeout 15s bash 2>&1",
+                cwd=run_cwd,
+            )
+        else:
+            final_output = "(no run command generated)"
 
-        error_markers = [
+        error_markers =[
             "Traceback", "ModuleNotFoundError", "ImportError",
             "SyntaxError", "Error:", "Exception:", "FAILED", "fatal:",
         ]
