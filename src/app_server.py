@@ -1,6 +1,8 @@
 import os
+import sys
 import logging
 import concurrent.futures
+import signal
 from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -14,6 +16,13 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
 logger = logging.getLogger(__name__)
 
+# Windows doesn't support SIGALRM
+IS_WINDOWS = sys.platform == 'win32'
+
+# Timeout configuration
+RESEARCH_TIMEOUT = 300  # 5 minutes for full research
+EXECUTE_TIMEOUT = 300   # 5 minutes for single execute
+
 # Serve index.html from the same directory as this script
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -24,6 +33,14 @@ CORS(app)
 @app.route("/")
 def index():
     return send_from_directory(BASE_DIR, "index.html")
+
+
+class TimeoutException(Exception):
+    pass
+
+
+def timeout_handler(signum, frame):
+    raise TimeoutException("Request timed out")
 
 
 @app.route("/api/research", methods=["POST"])
@@ -37,42 +54,53 @@ def research():
 
     logger.info(f"[Research] Topic: {topic}")
 
-    # Step 1: Find repo
-    
-    repo_urls = search_github_repos(topic, limit=3)
-    if not repo_urls:
-        return jsonify({"error": "No repositories found for that topic."}), 404
+    # Set timeout for the research operation (only works on Unix-like systems)
+    if not IS_WINDOWS:
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(RESEARCH_TIMEOUT)
 
-    # Step 2: Execute repos in parallel
-    execution_results = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
-        futures = {executor.submit(execute_repo, url): url for url in repo_urls}
-        for future in concurrent.futures.as_completed(futures):
-            url = futures[future]
-            try:
-                result = future.result()
-                execution_results.append(result)
-            except Exception as exc:
-                execution_results.append({
-                    "repo_url": url,
-                    "success": False,
-                    "project_type": "Unknown",
-                    "reasoning": "Agent crashed",
-                    "output": str(exc)
-                })
-
-    # Step 3: Master agent ranks
     try:
-        final_report = rank_and_summarize(topic, execution_results)
-    except Exception as e:
-        logger.error(f"Master agent error: {e}")
-        final_report = "Error generating report. Please check the individual repository outputs."
+        # Step 1: Find repo
+        repo_urls = search_github_repos(topic, limit=3)
+        if not repo_urls:
+            return jsonify({"error": "No repositories found for that topic."}), 404
 
-    return jsonify({
-        "topic": topic,
-        "repos": execution_results,
-        "report": final_report
-    })
+        # Step 2: Execute repos in parallel
+        execution_results = []
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            futures = {executor.submit(execute_repo, url): url for url in repo_urls}
+            for future in concurrent.futures.as_completed(futures):
+                url = futures[future]
+                try:
+                    result = future.result()
+                    execution_results.append(result)
+                except Exception as exc:
+                    execution_results.append({
+                        "repo_url": url,
+                        "success": False,
+                        "project_type": "Unknown",
+                        "reasoning": "Agent crashed",
+                        "output": str(exc)
+                    })
+
+        # Step 3: Master agent ranks
+        try:
+            final_report = rank_and_summarize(topic, execution_results)
+        except Exception as e:
+            logger.error(f"Master agent error: {e}")
+            final_report = "Error generating report. Please check the individual repository outputs."
+
+        return jsonify({
+            "topic": topic,
+            "repos": execution_results,
+            "report": final_report
+        })
+    except TimeoutException:
+        logger.error("[Research] Timeout reached")
+        return jsonify({"error": "Research operation timed out. Please try a simpler topic or fewer repos."}), 500
+    finally:
+        if not IS_WINDOWS:
+            signal.alarm(0)  # Cancel the alarm
 
 
 @app.route("/api/execute", methods=["POST"])
@@ -88,13 +116,25 @@ def execute():
         return jsonify({"error": "Please provide a full GitHub URL (https://...)."}), 400
 
     logger.info(f"[Execute] Repo: {repo_url}")
+
+    # Set timeout for the execute operation (only works on Unix-like systems)
+    if not IS_WINDOWS:
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(EXECUTE_TIMEOUT)
+
     try:
         result = execute_repo(repo_url)
+        return jsonify(result)
+    except TimeoutException:
+        logger.error("[Execute] Timeout reached")
+        return jsonify({"error": "Execute operation timed out. The repo may be too complex to run within the time limit."}), 500
     except Exception as e:
         logger.error(f"Execute error: {e}")
         result = {"repo_url": repo_url, "success": False, "project_type": "Unknown", "reasoning": "Exception occurred", "output": str(e)}
-
-    return jsonify(result)
+        return jsonify(result)
+    finally:
+        if not IS_WINDOWS:
+            signal.alarm(0)  # Cancel the alarm
 
 
 @app.route("/api/health", methods=["GET"])

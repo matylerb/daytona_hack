@@ -1,6 +1,9 @@
 
 import os
+import sys
 import logging
+import signal
+import threading
 from dotenv import load_dotenv
 from daytona import Daytona, DaytonaConfig
 from langchain_groq import ChatGroq
@@ -8,7 +11,6 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
 from typing import List
-
 
 logger = logging.getLogger(__name__)
 
@@ -91,12 +93,41 @@ def execute_repo(repo_link: str) -> dict:
         file_tree, file_contents = scrape_repo_context(sandbox, workspace_root)
         
         logger.info(f"[{repo_link}] Generating execution plan...")
-        plan_raw = chain.invoke({
-            "file_tree": file_tree, 
-            "file_contents": file_contents, 
-            "format_instructions": parser.get_format_instructions()
-        })
-        plan = RepoExecutionPlan(**plan_raw)
+
+        import signal
+        import sys
+
+        class TimeoutException(Exception):
+            pass
+
+        def timeout_handler(signum, frame):
+            raise TimeoutException("LLM call timed out")
+
+        # Set a 120 second timeout for LLM planning (Unix only)
+        has_sigalrm = hasattr(signal, 'SIGALRM')
+        if has_sigalrm:
+            signal.signal(signal.SIGALRM, timeout_handler)
+            signal.alarm(120)
+
+        try:
+            plan_raw = chain.invoke({
+                "file_tree": file_tree,
+                "file_contents": file_contents,
+                "format_instructions": parser.get_format_instructions()
+            })
+            plan = RepoExecutionPlan(**plan_raw)
+        except TimeoutException as e:
+            logger.error(f"[{repo_link}] Planning timeout: {e}")
+            return {
+                "repo_url": repo_link,
+                "success": False,
+                "project_type": "Unknown",
+                "reasoning": "Planning timed out",
+                "output": str(e)
+            }
+        finally:
+            if has_sigalrm:
+                signal.alarm(0)  # Cancel the alarm
 
         # SPEEDUP/FIX: Skip if it's just a markdown document/list
         if not plan.is_runnable:

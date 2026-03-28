@@ -1,6 +1,11 @@
 import os
+import logging
+import signal
+import sys
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
+
+logger = logging.getLogger(__name__)
 
 def rank_and_summarize(topic: str, execution_results: list[dict]) -> str:
     """
@@ -38,12 +43,29 @@ def rank_and_summarize(topic: str, execution_results: list[dict]) -> str:
         formatted_results += f"- Execution Output (Last 2000 chars):\n```\n{res['output']}\n```\n\n"
 
     chain = prompt | llm
-    response = chain.invoke({"topic": topic, "results": formatted_results})
+
+    class TimeoutException(Exception):
+        pass
+
+    def timeout_handler(signum, frame):
+        raise TimeoutException("Master agent report generation timed out")
 
 
+    # Set a 120 second timeout for master agent (Unix only)
+    if hasattr(signal, 'SIGALRM'):
+        signal.signal(signal.SIGALRM, timeout_handler)
+        signal.alarm(120)
 
-    
-    return response.content
+    try:
+        response = chain.invoke({"topic": topic, "results": formatted_results})
+        return response.content
+    except TimeoutException as e:
+        logger.error(f"Master agent timeout: {e}")
+        return f"# Research Report on '{topic}'\n\nMaster agent timed out while generating report.\n\n## Execution Results Summary:\n\n{formatted_results}"
+    finally:
+        # Cancel the alarm if on Unix
+        if hasattr(signal, 'SIGALRM'):
+            signal.alarm(0)
 
 
 def create_markdown(topic: str, execution_results: list[dict]) -> str:
