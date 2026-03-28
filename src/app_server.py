@@ -137,6 +137,27 @@ def execute():
             signal.alarm(0)  # Cancel the alarm
 
 
+@app.route("/api/cleanup", methods=["POST"])
+def cleanup():
+    """Cleanup Mode: delete all active Daytona sandboxes."""
+    try:
+        from researcher_agent import daytona as daytona_client
+        sandboxes = daytona_client.list()
+        items = sandboxes.items if hasattr(sandboxes, 'items') else list(sandboxes)
+        count = 0
+        for s in items:
+            try:
+                daytona_client.delete(s)
+                count += 1
+            except Exception as e:
+                logger.warning(f"Failed to delete sandbox {s.id}: {e}")
+        logger.info(f"[Cleanup] Deleted {count} sandbox(es).")
+        return jsonify({"status": "ok", "deleted": count})
+    except Exception as e:
+        logger.error(f"[Cleanup] Error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})

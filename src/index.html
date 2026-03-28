@@ -25,48 +25,7 @@ html, body {
     min-height: 100vh;
 }
 
-/* ─── NAV ─── */
-nav {
-    display: flex;
-    align-items: center;
-    border-bottom: var(--border);
-    padding: 0;
-    position: sticky;
-    top: 0;
-    background: var(--white);
-    z-index: 100;
-}
-
-.nav-brand {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.1rem;
-    letter-spacing: 0.15em;
-    padding: 12px 20px;
-    border-right: var(--border);
-    white-space: nowrap;
-}
-
-.nav-links {
-    display: flex;
-    list-style: none;
-    flex: 1;
-}
-
-.nav-links li a {
-    display: block;
-    padding: 12px 18px;
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    text-decoration: none;
-    color: var(--black);
-    border-right: var(--border-light);
-    transition: background 0.1s;
-}
-
-.nav-links li a:hover { background: var(--black); color: var(--white); }
-
-/* ─── HERO HEADER (merged) ─── */
+/* ─── HERO ─── */
 .hero {
     display: block;
     border-bottom: var(--border);
@@ -84,13 +43,12 @@ nav {
 
 .hero-main h1 {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.8rem;      /* smaller text */
+    font-size: 1.8rem;
     line-height: 1.2;
     letter-spacing: 0.08em;
-    white-space: nowrap;    /* forces single line */
+    white-space: nowrap;
 }
 
-.hero-main h1 span { display: block; }
 .hero-main h1 .dash { color: var(--accent); }
 
 .hero-tagline {
@@ -131,23 +89,7 @@ nav {
     flex-shrink: 0;
 }
 
-.hero-meta {
-    padding: 28px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    min-width: 220px;
-}
-
-.hero-meta .status-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.65rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-}
-
+/* ─── DOTS ─── */
 .dot {
     width: 8px;
     height: 8px;
@@ -156,11 +98,7 @@ nav {
     flex-shrink: 0;
 }
 .dot.green { background: #2ecc71; }
-.dot.red { background: var(--accent); }
-.dot.pulse {
-    background: #f39c12;
-    animation: pulse 1s infinite;
-}
+.dot.pulse { background: #f39c12; animation: pulse 1s infinite; }
 
 @keyframes pulse {
     0%, 100% { opacity: 1; }
@@ -186,16 +124,10 @@ nav {
     color: var(--mid);
     border-right: var(--border-light);
     transition: all 0.15s;
-    position: relative;
 }
 
 .mode-btn:last-child { border-right: none; }
-
-.mode-btn.active {
-    background: var(--black);
-    color: var(--white);
-    font-weight: 700;
-}
+.mode-btn.active { background: var(--black); color: var(--white); font-weight: 700; }
 
 .mode-btn .mode-label {
     display: flex;
@@ -248,11 +180,51 @@ nav {
 
 .main-input::placeholder { color: #bbb; }
 
+/* ─── BUTTON GROUP ─── */
+.btn-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.cleanup-btn {
+    flex: 1;
+    padding: 0 28px;
+    background: var(--white);
+    color: var(--mid);
+    border: none;
+    border-left: var(--border);
+    border-bottom: var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+}
+
+.cleanup-btn:hover { background: #fff0ef; color: var(--accent); }
+.cleanup-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.cleanup-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+}
+
 .submit-btn {
+    flex: 1;
     padding: 0 36px;
     background: var(--black);
     color: var(--white);
     border: none;
+    border-left: var(--border);
     font-family: 'Bebas Neue', sans-serif;
     font-size: 1.1rem;
     letter-spacing: 0.15em;
@@ -265,11 +237,8 @@ nav {
 .submit-btn:disabled { background: #888; cursor: not-allowed; }
 
 /* ─── RESULTS AREA ─── */
-.results-area {
-    min-height: 60vh;
-}
+.results-area { min-height: 60vh; }
 
-/* Empty state */
 .empty-state {
     display: flex;
     flex-direction: column;
@@ -296,14 +265,11 @@ nav {
     color: var(--mid);
 }
 
-/* Loading state */
 .loading-state {
     display: none;
     padding: 48px 32px;
     border-bottom: var(--border);
 }
-
-.loading-state.visible { display: block; }
 
 .loading-header {
     font-family: 'Bebas Neue', sans-serif;
@@ -325,9 +291,7 @@ nav {
     flex-shrink: 0;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .agent-grid {
     display: grid;
@@ -366,11 +330,8 @@ nav {
     font-style: italic;
 }
 
-/* ─── REPO RESULTS GRID ─── */
-.repo-grid {
-    display: none;
-}
-
+/* ─── REPO RESULTS ─── */
+.repo-grid { display: none; }
 .repo-grid.visible { display: block; }
 
 .section-label {
@@ -389,21 +350,8 @@ nav {
     border-bottom: var(--border);
 }
 
-.repo-card {
-    border-right: var(--border-light);
-    display: flex;
-    flex-direction: column;
-}
-
+.repo-card { border-right: var(--border-light); display: flex; flex-direction: column; }
 .repo-card:last-child { border-right: none; }
-
-.repo-card-header {
-    padding: 16px 20px;
-    border-bottom: var(--border-light);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
 
 .repo-card-row {
     display: grid;
@@ -411,7 +359,6 @@ nav {
     gap: 12px;
     align-items: baseline;
     border-bottom: 1px solid #e8e5de;
-    padding: 0;
 }
 
 .repo-card-row:last-child { border-bottom: none; }
@@ -435,12 +382,7 @@ nav {
     line-height: 1.4;
 }
 
-.rc-value a {
-    color: var(--black);
-    text-decoration: none;
-    border-bottom: 1px solid var(--black);
-}
-
+.rc-value a { color: var(--black); text-decoration: none; border-bottom: 1px solid var(--black); }
 .rc-value a:hover { color: var(--accent); border-color: var(--accent); }
 
 .status-badge {
@@ -456,12 +398,7 @@ nav {
 .status-badge.ok { color: #2ecc71; }
 .status-badge.fail { color: var(--accent); }
 
-.output-panel {
-    padding: 16px 20px;
-    flex: 1;
-    background: var(--black);
-    overflow: hidden;
-}
+.output-panel { padding: 16px 20px; flex: 1; background: var(--black); overflow: hidden; }
 
 .output-label {
     font-size: 0.55rem;
@@ -488,11 +425,7 @@ nav {
 .output-code::-webkit-scrollbar-thumb { background: #333; }
 
 /* ─── REPORT PANEL ─── */
-.report-panel {
-    display: none;
-    border-bottom: var(--border);
-}
-
+.report-panel { display: none; border-bottom: var(--border); }
 .report-panel.visible { display: block; }
 
 .report-header {
@@ -517,12 +450,8 @@ nav {
     color: var(--black);
 }
 
-.report-body h1,
-.report-body h2,
-.report-body h3,
-.report-body h4,
-.report-body h5,
-.report-body h6 {
+.report-body h1, .report-body h2, .report-body h3,
+.report-body h4, .report-body h5, .report-body h6 {
     font-family: 'Bebas Neue', sans-serif;
     letter-spacing: 0.06em;
     margin: 1.6em 0 0.5em;
@@ -533,16 +462,9 @@ nav {
 .report-body h2 { font-size: 1.5rem; border-bottom: var(--border-light); padding-bottom: 6px; }
 .report-body h3 { font-size: 1.15rem; }
 .report-body h4 { font-size: 0.95rem; }
-
 .report-body p { margin: 0.6em 0 1em; }
-
-.report-body a {
-    color: var(--black);
-    text-underline-offset: 3px;
-    text-decoration-thickness: 1px;
-}
+.report-body a { color: var(--black); text-underline-offset: 3px; }
 .report-body a:hover { color: var(--accent); }
-
 .report-body strong { font-weight: 700; }
 .report-body em { font-style: italic; color: #555; }
 
@@ -563,16 +485,8 @@ nav {
     padding: 16px 20px;
     overflow-x: auto;
     margin: 1.2em 0;
-    position: relative;
 }
-.report-body pre code {
-    background: none;
-    border: none;
-    padding: 0;
-    color: #a8ff78;
-    font-size: 0.72rem;
-    line-height: 1.7;
-}
+.report-body pre code { background: none; border: none; padding: 0; color: #a8ff78; font-size: 0.72rem; line-height: 1.7; }
 
 .report-body blockquote {
     border-left: 4px solid var(--black);
@@ -583,224 +497,113 @@ nav {
     font-style: italic;
 }
 .report-body blockquote p { margin: 0; }
-
-.report-body ul,
-.report-body ol {
-    padding-left: 1.6em;
-    margin: 0.5em 0 1em;
-}
+.report-body ul, .report-body ol { padding-left: 1.6em; margin: 0.5em 0 1em; }
 .report-body li { margin: 0.25em 0; }
 .report-body ul li::marker { color: var(--accent); content: "▸  "; }
 .report-body ol li::marker { font-weight: 700; }
-
-.report-body ul ul,
-.report-body ol ul { margin: 0.2em 0; }
-
-.report-body table {
-    border-collapse: collapse;
-    width: 100%;
-    margin: 1.2em 0;
-    font-size: 0.72rem;
-}
-.report-body th {
-    background: var(--black);
-    color: var(--white);
-    padding: 8px 14px;
-    text-align: left;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-size: 0.65rem;
-}
-.report-body td {
-    padding: 8px 14px;
-    border-bottom: 1px solid #ddd;
-    border-right: 1px solid #e8e5de;
-    vertical-align: top;
-}
+.report-body table { border-collapse: collapse; width: 100%; margin: 1.2em 0; font-size: 0.72rem; }
+.report-body th { background: var(--black); color: var(--white); padding: 8px 14px; text-align: left; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; font-size: 0.65rem; }
+.report-body td { padding: 8px 14px; border-bottom: 1px solid #ddd; border-right: 1px solid #e8e5de; vertical-align: top; }
 .report-body td:last-child { border-right: none; }
 .report-body tr:nth-child(even) td { background: #f0ede6; }
 .report-body tr:hover td { background: #e8e5de; }
-
-.report-body hr {
-    border: none;
-    border-top: var(--border);
-    margin: 2em 0;
-}
-
-.report-body input[type="checkbox"] {
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    border: 2px solid var(--black);
-    display: inline-block;
-    vertical-align: middle;
-    margin-right: 6px;
-    position: relative;
-    top: -1px;
-    cursor: default;
-}
-.report-body input[type="checkbox"]:checked { background: var(--black); }
-.report-body input[type="checkbox"]:checked::after {
-    content: "✓";
-    position: absolute;
-    color: var(--white);
-    font-size: 8px;
-    left: 1px;
-    top: -1px;
-}
-
+.report-body hr { border: none; border-top: var(--border); margin: 2em 0; }
 .report-body > *:first-child { margin-top: 0; }
 
-/* ─── EXECUTE MODE RESULT ─── */
+/* ─── EXECUTE RESULT ─── */
 .execute-result { display: none; }
 .execute-result.visible { display: block; }
 
-.exec-meta {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    border-bottom: var(--border-light);
-}
-
-.exec-meta-item {
-    padding: 16px 20px;
-    border-right: var(--border-light);
-    border-bottom: var(--border-light);
-}
-
+.exec-meta { display: grid; grid-template-columns: repeat(2, 1fr); border-bottom: var(--border-light); }
+.exec-meta-item { padding: 16px 20px; border-right: var(--border-light); border-bottom: var(--border-light); }
 .exec-meta-item:nth-child(2n) { border-right: none; }
-
-.exec-meta-label {
-    font-size: 0.58rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--mid);
-    margin-bottom: 4px;
-}
-
-.exec-meta-value {
-    font-size: 0.78rem;
-    font-weight: 700;
-    word-break: break-all;
-}
-
-.exec-output-full {
-    padding: 0;
-    background: var(--black);
-}
-
-.exec-output-full .output-label {
-    padding: 12px 20px;
-    border-bottom: 1px solid #1a1a1a;
-    margin: 0;
-}
-
-.exec-output-full .output-code {
-    padding: 20px;
-    max-height: 500px;
-}
+.exec-meta-label { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--mid); margin-bottom: 4px; }
+.exec-meta-value { font-size: 0.78rem; font-weight: 700; word-break: break-all; }
+.exec-output-full { padding: 0; background: var(--black); }
+.exec-output-full .output-label { padding: 12px 20px; border-bottom: 1px solid #1a1a1a; margin: 0; }
+.exec-output-full .output-code { padding: 20px; max-height: 500px; }
 
 /* ─── ERROR ─── */
-.error-banner {
-    display: none;
-    background: var(--accent);
-    color: var(--white);
-    padding: 14px 20px;
-    font-size: 0.7rem;
-    letter-spacing: 0.04em;
-    border-bottom: var(--border);
-}
-
+.error-banner { display: none; background: var(--accent); color: var(--white); padding: 14px 20px; font-size: 0.7rem; letter-spacing: 0.04em; border-bottom: var(--border); }
 .error-banner.visible { display: block; }
 
 /* ─── FOOTER ─── */
-footer {
-    padding: 14px 20px;
-    display: flex;
-    gap: 20px;
-    align-items: center;
-    border-top: var(--border-light);
-}
-
-footer span {
-    font-size: 0.6rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--mid);
-    cursor: pointer;
-}
-
+footer { padding: 14px 20px; display: flex; gap: 20px; align-items: center; border-top: var(--border-light); }
+footer span { font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--mid); cursor: pointer; }
 footer span:hover { color: var(--black); }
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 900px) {
-    .hero { grid-template-columns: 1fr; }
-    .hero-main { border-right: none; border-bottom: var(--border-light); }
+    .hero-main h1 { white-space: normal; font-size: 1.4rem; }
     .repo-cards { grid-template-columns: 1fr; }
     .repo-card { border-right: none; border-bottom: var(--border-light); }
     .agent-grid { grid-template-columns: 1fr; }
     .exec-meta { grid-template-columns: 1fr; }
     .input-zone { grid-template-columns: 1fr; }
-    .submit-btn { padding: 18px; width: 100%; border-top: var(--border); }
     .input-wrap { border-right: none; }
+    .btn-group { flex-direction: row; }
+    .cleanup-btn { border-left: none; border-top: var(--border); border-bottom: none; border-right: var(--border); }
+    .submit-btn { border-left: none; border-top: var(--border); }
 }
 </style>
 </head>
 <body>
 
-<!-- HERO (merged) -->
+<!-- HERO -->
 <header class="hero">
     <div class="hero-main">
-    <h1>
-        REPO<span class="dash">—</span> RESEARCH AGENT TERMINAL
-    </h1>
-    <div class="hero-tagline">
-        <span class="flow-step"><span class="step-num">01</span> Pick a mode</span>
-        <span class="step-arrow">→</span>
-        <span class="flow-step"><span class="step-num">02</span> Enter a topic or repo URL</span>
-        <span class="step-arrow">→</span>
-        <span class="flow-step"><span class="step-num">03</span> 3 agents spin up Daytona sandboxes</span>
-        <span class="step-arrow">→</span>
-        <span class="flow-step"><span class="step-num">04</span> Each clones, installs &amp; runs</span>
-        <span class="step-arrow">→</span>
-        <span class="flow-step"><span class="step-num">05</span> LLM ranks &amp; generates report</span>
+        <h1>REPO<span class="dash">—</span> RESEARCH AGENT TERMINAL</h1>
+        <div class="hero-tagline">
+            <span class="flow-step"><span class="step-num">01</span> Pick a mode</span>
+            <span class="step-arrow">→</span>
+            <span class="flow-step"><span class="step-num">02</span> Enter a topic or repo URL</span>
+            <span class="step-arrow">→</span>
+            <span class="flow-step"><span class="step-num">03</span> 3 agents spin up Daytona sandboxes</span>
+            <span class="step-arrow">→</span>
+            <span class="flow-step"><span class="step-num">04</span> Each clones, installs &amp; runs</span>
+            <span class="step-arrow">→</span>
+            <span class="flow-step"><span class="step-num">05</span> LLM ranks &amp; generates report</span>
+        </div>
     </div>
-    </div>
-
 </header>
 
 <!-- MODE SWITCHER -->
 <div class="mode-bar">
-<button class="mode-btn active" id="btn-research" onclick="switchMode('research')">
-    <span class="mode-label">
-    <span class="mode-tag">01</span>
-    Research Mode — Find &amp; Rank Repos
-    </span>
-</button>
-<button class="mode-btn" id="btn-execute" onclick="switchMode('execute')">
-    <span class="mode-label">
-    <span class="mode-tag">02</span>
-    Execute Mode — Run Single Repo
-    </span>
-</button>
+    <button class="mode-btn active" id="btn-research" onclick="switchMode('research')">
+        <span class="mode-label">
+            <span class="mode-tag">01</span>
+            Research Mode — Find &amp; Rank Repos
+        </span>
+    </button>
+    <button class="mode-btn" id="btn-execute" onclick="switchMode('execute')">
+        <span class="mode-label">
+            <span class="mode-tag">02</span>
+            Execute Mode — Run Single Repo
+        </span>
+    </button>
 </div>
 
 <!-- INPUT ZONE -->
 <div class="input-zone">
-<div class="input-wrap">
-    <span class="input-prefix" id="input-prefix">TOPIC://</span>
-    <input
-    class="main-input"
-    id="main-input"
-    type="text"
-    placeholder="e.g. machine learning with fastapi"
-    autocomplete="off"
-    spellcheck="false"
-    />
-</div>
-<button class="submit-btn" id="submit-btn" onclick="handleSubmit()">
-    EXECUTE
-</button>
+    <div class="input-wrap">
+        <span class="input-prefix" id="input-prefix">TOPIC://</span>
+        <input
+            class="main-input"
+            id="main-input"
+            type="text"
+            placeholder="e.g. machine learning with fastapi"
+            autocomplete="off"
+            spellcheck="false"
+        />
+    </div>
+    <div class="btn-group">
+        <button class="cleanup-btn" id="cleanup-btn" onclick="handleCleanup()">
+            <span class="cleanup-dot"></span> CLEANUP SANDBOXES
+        </button>
+        <button class="submit-btn" id="submit-btn" onclick="handleSubmit()">
+            EXECUTE
+        </button>
+    </div>
 </div>
 
 <!-- ERROR -->
@@ -809,64 +612,62 @@ footer span:hover { color: var(--black); }
 <!-- RESULTS AREA -->
 <div class="results-area">
 
-<div class="empty-state" id="empty-state">
-    <div class="empty-glyph">{ }</div>
-    <div class="empty-label">Awaiting input — select a mode and enter a query</div>
-</div>
+    <div class="empty-state" id="empty-state">
+        <div class="empty-glyph">{ }</div>
+        <div class="empty-label">Awaiting input — select a mode and enter a query</div>
+    </div>
 
-<div class="loading-state" id="loading-state">
-    <div class="loading-header">
-    <div class="spinner"></div>
-    <span id="loading-title">DISPATCHING AGENTS...</span>
+    <div class="loading-state" id="loading-state">
+        <div class="loading-header">
+            <div class="spinner"></div>
+            <span id="loading-title">DISPATCHING AGENTS...</span>
+        </div>
+        <div class="agent-grid" id="agent-grid">
+            <div class="agent-card">
+                <div class="agent-id">Agent / 001</div>
+                <div class="agent-status"><div class="dot pulse"></div> <span id="a1-status">Scanning GitHub...</span></div>
+                <div class="log-line" id="a1-log">Initializing sandbox</div>
+            </div>
+            <div class="agent-card">
+                <div class="agent-id">Agent / 002</div>
+                <div class="agent-status"><div class="dot pulse"></div> <span id="a2-status">Scanning GitHub...</span></div>
+                <div class="log-line" id="a2-log">Initializing sandbox</div>
+            </div>
+            <div class="agent-card">
+                <div class="agent-id">Agent / 003</div>
+                <div class="agent-status"><div class="dot pulse"></div> <span id="a3-status">Scanning GitHub...</span></div>
+                <div class="log-line" id="a3-log">Initializing sandbox</div>
+            </div>
+        </div>
     </div>
-    <div class="agent-grid" id="agent-grid">
-    <div class="agent-card">
-        <div class="agent-id">Agent / 001</div>
-        <div class="agent-status"><div class="dot pulse"></div> <span id="a1-status">Scanning GitHub...</span></div>
-        <div class="log-line" id="a1-log">Initializing sandbox</div>
-    </div>
-    <div class="agent-card">
-        <div class="agent-id">Agent / 002</div>
-        <div class="agent-status"><div class="dot pulse"></div> <span id="a2-status">Scanning GitHub...</span></div>
-        <div class="log-line" id="a2-log">Initializing sandbox</div>
-    </div>
-    <div class="agent-card">
-        <div class="agent-id">Agent / 003</div>
-        <div class="agent-status"><div class="dot pulse"></div> <span id="a3-status">Scanning GitHub...</span></div>
-        <div class="log-line" id="a3-log">Initializing sandbox</div>
-    </div>
-    </div>
-</div>
 
-<div class="repo-grid" id="repo-grid">
-    <div class="section-label">LATEST EXECUTION RESULTS</div>
-    <div class="repo-cards" id="repo-cards"></div>
-</div>
-
-<div class="report-panel" id="report-panel">
-    <div class="report-header">
-    🏆 &nbsp;MASTER AGENT REPORT
+    <div class="repo-grid" id="repo-grid">
+        <div class="section-label">LATEST EXECUTION RESULTS</div>
+        <div class="repo-cards" id="repo-cards"></div>
     </div>
-    <div class="report-body" id="report-body"></div>
-</div>
 
-<div class="execute-result" id="execute-result">
-    <div class="section-label">EXECUTION RESULT</div>
-    <div class="exec-meta" id="exec-meta"></div>
-    <div class="exec-output-full">
-    <div class="output-label">// STDOUT</div>
-    <pre class="output-code" id="exec-output-code"></pre>
+    <div class="report-panel" id="report-panel">
+        <div class="report-header">🏆 &nbsp;MASTER AGENT REPORT</div>
+        <div class="report-body" id="report-body"></div>
     </div>
-</div>
+
+    <div class="execute-result" id="execute-result">
+        <div class="section-label">EXECUTION RESULT</div>
+        <div class="exec-meta" id="exec-meta"></div>
+        <div class="exec-output-full">
+            <div class="output-label">// STDOUT</div>
+            <pre class="output-code" id="exec-output-code"></pre>
+        </div>
+    </div>
 
 </div>
 
 <!-- FOOTER -->
 <footer>
-<span>GitHub</span>
-<span>Daytona</span>
-<span>Groq LLM</span>
-<span id="footer-time"></span>
+    <span>GitHub</span>
+    <span>Daytona</span>
+    <span>Groq LLM</span>
+    <span id="footer-time"></span>
 </footer>
 
 <script>
@@ -876,50 +677,26 @@ let currentMode = "research";
 function tick() {
     const d = new Date();
     document.getElementById("footer-time").textContent =
-    d.toISOString().replace("T", " ").slice(0, 19) + " UTC";
+        d.toISOString().replace("T", " ").slice(0, 19) + " UTC";
 }
 tick();
 setInterval(tick, 1000);
 
-async function checkHealth() {
-    try {
-    const r = await fetch(`${API_BASE}/api/health`, { signal: AbortSignal.timeout(3000) });
-    if (r.ok) {
-        document.getElementById("dot-api").className = "dot green";
-        document.getElementById("label-api").textContent = "API Online";
-        document.getElementById("dot-daytona").className = "dot green";
-        document.getElementById("label-daytona").textContent = "Daytona Ready";
-    }
-    } catch {}
-}
-checkHealth();
-setInterval(checkHealth, 10000);
-
 function switchMode(mode) {
     currentMode = mode;
-    const btnR = document.getElementById("btn-research");
-    const btnE = document.getElementById("btn-execute");
-    const prefix = document.getElementById("input-prefix");
-    const input = document.getElementById("main-input");
-
-    btnR.classList.toggle("active", mode === "research");
-    btnE.classList.toggle("active", mode === "execute");
-
-    if (mode === "research") {
-    prefix.textContent = "TOPIC://";
-    input.placeholder = "e.g. machine learning with fastapi";
-    } else {
-    prefix.textContent = "REPO://";
-    input.placeholder = "e.g. https://github.com/owner/repo";
-    }
-
+    document.getElementById("btn-research").classList.toggle("active", mode === "research");
+    document.getElementById("btn-execute").classList.toggle("active", mode === "execute");
+    document.getElementById("input-prefix").textContent = mode === "research" ? "TOPIC://" : "REPO://";
+    document.getElementById("main-input").placeholder = mode === "research"
+        ? "e.g. machine learning with fastapi"
+        : "e.g. https://github.com/owner/repo";
     resetResults();
 }
 
 function resetResults() {
     ["repo-grid", "report-panel", "execute-result", "loading-state"].forEach(id => {
-    document.getElementById(id).classList.remove("visible");
-    if (id === "loading-state") document.getElementById(id).style.display = "none";
+        document.getElementById(id).classList.remove("visible");
+        if (id === "loading-state") document.getElementById(id).style.display = "none";
     });
     document.getElementById("empty-state").style.display = "flex";
     document.getElementById("error-banner").classList.remove("visible");
@@ -935,11 +712,10 @@ const logMessages = [
 function startAgentAnimation() {
     let step = 0;
     logInterval = setInterval(() => {
-    step++;
-    for (let i = 1; i <= 3; i++) {
-        const msgs = logMessages[i - 1];
-        document.getElementById(`a${i}-log`).textContent = msgs[step % msgs.length];
-    }
+        step++;
+        for (let i = 1; i <= 3; i++) {
+            document.getElementById(`a${i}-log`).textContent = logMessages[i - 1][step % 3];
+        }
     }, 1800);
 }
 
@@ -965,14 +741,14 @@ async function handleSubmit() {
     loading.style.display = "block";
 
     if (currentMode === "research") {
-    document.getElementById("agent-grid").style.display = "grid";
-    document.getElementById("loading-title").textContent = "DISPATCHING AGENTS — TOPIC: " + input.toUpperCase();
-    startAgentAnimation();
-    await doResearch(input);
+        document.getElementById("agent-grid").style.display = "grid";
+        document.getElementById("loading-title").textContent = "DISPATCHING AGENTS — TOPIC: " + input.toUpperCase();
+        startAgentAnimation();
+        await doResearch(input);
     } else {
-    document.getElementById("agent-grid").style.display = "none";
-    document.getElementById("loading-title").textContent = "EXECUTING REPO — " + input;
-    await doExecute(input);
+        document.getElementById("agent-grid").style.display = "none";
+        document.getElementById("loading-title").textContent = "EXECUTING REPO — " + input;
+        await doExecute(input);
     }
 
     stopAgentAnimation();
@@ -983,57 +759,52 @@ async function handleSubmit() {
 
 async function doResearch(topic) {
     try {
-    const res = await fetch(`${API_BASE}/api/research`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Unknown error");
-    renderRepoCards(data.repos);
-    renderReport(data.report);
-    } catch (e) {
-    showError(e.message);
-    }
+        const res = await fetch(`${API_BASE}/api/research`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topic })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Unknown error");
+        renderRepoCards(data.repos);
+        renderReport(data.report);
+    } catch (e) { showError(e.message); }
 }
 
 function renderRepoCards(repos) {
     const container = document.getElementById("repo-cards");
     container.innerHTML = "";
     repos.forEach((repo, i) => {
-    const url = repo.repo_url || "";
-    const name = url.split("/").slice(-2).join("/") || url;
-    const success = repo.success;
-    const type = repo.project_type || "Unknown";
-    const output = (repo.output || "").trim();
-    container.innerHTML += `
-        <div class="repo-card">
-        <div class="repo-card-row">
-            <div class="rc-label">Title</div>
-            <div class="rc-value"><a href="${url}" target="_blank">${name}</a></div>
-        </div>
-        <div class="repo-card-row">
-            <div class="rc-label">Type</div>
-            <div class="rc-value">${escHtml(type)}</div>
-        </div>
-        <div class="repo-card-row">
-            <div class="rc-label">Status</div>
-            <div class="rc-value">
-            <span class="status-badge ${success ? 'ok' : 'fail'}">
-                ${success ? '✓ Success' : '✗ Failed'}
-            </span>
-            </div>
-        </div>
-        <div class="repo-card-row">
-            <div class="rc-label">Agent</div>
-            <div class="rc-value">0${i + 1}</div>
-        </div>
-        <div class="output-panel">
-            <div class="output-label">// STDOUT</div>
-            <pre class="output-code">${escHtml(output || '(no output)')}</pre>
-        </div>
-        </div>
-    `;
+        const url = repo.repo_url || "";
+        const name = url.split("/").slice(-2).join("/") || url;
+        const output = (repo.output || "").trim();
+        container.innerHTML += `
+            <div class="repo-card">
+                <div class="repo-card-row">
+                    <div class="rc-label">Title</div>
+                    <div class="rc-value"><a href="${url}" target="_blank">${name}</a></div>
+                </div>
+                <div class="repo-card-row">
+                    <div class="rc-label">Type</div>
+                    <div class="rc-value">${escHtml(repo.project_type || "Unknown")}</div>
+                </div>
+                <div class="repo-card-row">
+                    <div class="rc-label">Status</div>
+                    <div class="rc-value">
+                        <span class="status-badge ${repo.success ? 'ok' : 'fail'}">
+                            ${repo.success ? '✓ Success' : '✗ Failed'}
+                        </span>
+                    </div>
+                </div>
+                <div class="repo-card-row">
+                    <div class="rc-label">Agent</div>
+                    <div class="rc-value">0${i + 1}</div>
+                </div>
+                <div class="output-panel">
+                    <div class="output-label">// STDOUT</div>
+                    <pre class="output-code">${escHtml(output || '(no output)')}</pre>
+                </div>
+            </div>`;
     });
     document.getElementById("repo-grid").classList.add("visible");
 }
@@ -1046,47 +817,62 @@ function renderReport(report) {
 
 async function doExecute(repoUrl) {
     try {
-    const res = await fetch(`${API_BASE}/api/execute`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ repo_url: repoUrl })
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Unknown error");
-    renderExecuteResult(data);
-    } catch (e) {
-    showError(e.message);
-    }
+        const res = await fetch(`${API_BASE}/api/execute`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ repo_url: repoUrl })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Unknown error");
+        renderExecuteResult(data);
+    } catch (e) { showError(e.message); }
 }
 
 function renderExecuteResult(data) {
-    const meta = document.getElementById("exec-meta");
     const url = data.repo_url || "";
     const name = url.split("/").slice(-2).join("/") || url;
-    meta.innerHTML = `
-    <div class="exec-meta-item">
-        <div class="exec-meta-label">Repository</div>
-        <div class="exec-meta-value"><a href="${url}" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid">${name}</a></div>
-    </div>
-    <div class="exec-meta-item">
-        <div class="exec-meta-label">Status</div>
-        <div class="exec-meta-value">
-        <span class="status-badge ${data.success ? 'ok' : 'fail'}">
-            ${data.success ? '✓ Success' : '✗ Failed'}
-        </span>
+    document.getElementById("exec-meta").innerHTML = `
+        <div class="exec-meta-item">
+            <div class="exec-meta-label">Repository</div>
+            <div class="exec-meta-value"><a href="${url}" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid">${name}</a></div>
         </div>
-    </div>
-    <div class="exec-meta-item">
-        <div class="exec-meta-label">Project Type</div>
-        <div class="exec-meta-value">${escHtml(data.project_type || 'Unknown')}</div>
-    </div>
-    <div class="exec-meta-item">
-        <div class="exec-meta-label">Reasoning</div>
-        <div class="exec-meta-value" style="font-weight:400;font-size:0.7rem">${escHtml(data.reasoning || '')}</div>
-    </div>
-    `;
+        <div class="exec-meta-item">
+            <div class="exec-meta-label">Status</div>
+            <div class="exec-meta-value">
+                <span class="status-badge ${data.success ? 'ok' : 'fail'}">
+                    ${data.success ? '✓ Success' : '✗ Failed'}
+                </span>
+            </div>
+        </div>
+        <div class="exec-meta-item">
+            <div class="exec-meta-label">Project Type</div>
+            <div class="exec-meta-value">${escHtml(data.project_type || 'Unknown')}</div>
+        </div>
+        <div class="exec-meta-item">
+            <div class="exec-meta-label">Reasoning</div>
+            <div class="exec-meta-value" style="font-weight:400;font-size:0.7rem">${escHtml(data.reasoning || '')}</div>
+        </div>`;
     document.getElementById("exec-output-code").textContent = (data.output || "(no output)").trim();
     document.getElementById("execute-result").classList.add("visible");
+}
+
+async function handleCleanup() {
+    const btn = document.getElementById("cleanup-btn");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="cleanup-dot"></span> CLEANING...';
+    try {
+        const res = await fetch(`${API_BASE}/api/cleanup`, { method: "POST" });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Cleanup failed");
+        btn.innerHTML = `<span class="cleanup-dot"></span> DONE — ${data.deleted ?? 0} DELETED`;
+    } catch (e) {
+        btn.innerHTML = '<span class="cleanup-dot"></span> ERROR';
+    } finally {
+        setTimeout(() => {
+            btn.innerHTML = '<span class="cleanup-dot"></span> CLEANUP SANDBOXES';
+            btn.disabled = false;
+        }, 3000);
+    }
 }
 
 function showError(msg) {
@@ -1098,10 +884,10 @@ function showError(msg) {
 
 function escHtml(str) {
     return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
 }
 
 document.getElementById("main-input").addEventListener("keydown", e => {
