@@ -55,7 +55,7 @@ def main():
     final_report = rank_and_summarize(topic, execution_results)
     
     print("="*60)
-    print("🏆 FINAL RESEARCH REPORT 🏆")
+    print("FINAL RESEARCH REPORT")
     print("="*60)
     print(final_report)
 

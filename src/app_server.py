@@ -37,7 +37,8 @@ def research():
 
     logger.info(f"[Research] Topic: {topic}")
 
-    # Step 1: Find repos
+    # Step 1: Find repo
+    
     repo_urls = search_github_repos(topic, limit=3)
     if not repo_urls:
         return jsonify({"error": "No repositories found for that topic."}), 404
@@ -61,7 +62,11 @@ def research():
                 })
 
     # Step 3: Master agent ranks
-    final_report = rank_and_summarize(topic, execution_results)
+    try:
+        final_report = rank_and_summarize(topic, execution_results)
+    except Exception as e:
+        logger.error(f"Master agent error: {e}")
+        final_report = "Error generating report. Please check the individual repository outputs."
 
     return jsonify({
         "topic": topic,
@@ -83,7 +88,11 @@ def execute():
         return jsonify({"error": "Please provide a full GitHub URL (https://...)."}), 400
 
     logger.info(f"[Execute] Repo: {repo_url}")
-    result = execute_repo(repo_url)
+    try:
+        result = execute_repo(repo_url)
+    except Exception as e:
+        logger.error(f"Execute error: {e}")
+        result = {"repo_url": repo_url, "success": False, "project_type": "Unknown", "reasoning": "Exception occurred", "output": str(e)}
 
     return jsonify(result)
 
@@ -91,6 +100,22 @@ def execute():
 @app.route("/api/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
+
+
+@app.errorhandler(Exception)
+def handle_exception(e):
+    logger.error(f"Unhandled exception: {e}", exc_info=True)
+    return jsonify({"error": "Internal server error"}), 500
+
+
+@app.errorhandler(404)
+def handle_404(e):
+    return jsonify({"error": "Not found"}), 404
+
+
+@app.errorhandler(400)
+def handle_400(e):
+    return jsonify({"error": "Bad request"}), 400
 
 
 if __name__ == "__main__":
