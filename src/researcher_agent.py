@@ -1,5 +1,7 @@
+
 import os
 import logging
+from dotenv import load_dotenv
 from daytona import Daytona, DaytonaConfig
 from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
@@ -7,11 +9,17 @@ from langchain_core.output_parsers import JsonOutputParser
 from pydantic import BaseModel, Field
 from typing import List
 
+
 logger = logging.getLogger(__name__)
 
+
 # --- Setup LLM & Daytona ---
+load_dotenv()
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 DAYTONA_API_KEY = os.environ.get("DAYTONA_API_KEY", "")
+
+if not DAYTONA_API_KEY:
+    raise RuntimeError("DAYTONA_API_KEY is not set. Please set it in your .env file or environment variables.")
 
 config = DaytonaConfig(api_key=DAYTONA_API_KEY)
 daytona = Daytona(config)

@@ -1,7 +1,7 @@
 from daytona import Daytona, DaytonaConfig
 import os
 
-DaytonaConfig.load_from_env()
+
 daytona = Daytona()
 
 sandboxes = daytona.list()
